@@ -1,6 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=Quicksand');
+
 html, body {
   height: 100%;
   margin: 0;
+}
+
+body {
+  font-family: Quicksand;
 }
 
 .center-elem {
