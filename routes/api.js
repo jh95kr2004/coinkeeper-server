@@ -1,6 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
+var mysql = require('mysql');
+var con = mysql.createConnection({
+  host: "coinkeeper.cyafa3gjnbdg.ap-northeast-2.rds.amazonaws.com",
+  user: "coinkeeper",
+  password: "coinkeeper",
+  port: 3306
+});
+
 router.get('/currency', function(req, res, next) {
 });
 
