@@ -3,29 +3,19 @@ var router = express.Router();
 
 var mysql = require('mysql');
 
-var conPriceDB = mysql.createConnection({
-  host: "coinkeeper.cyafa3gjnbdg.ap-northeast-2.rds.amazonaws.com",
-  user: "coinkeeper",
-  password: "coinkeeper",
-  database: "price_db",
-  port: 3306
-});
+function DBConnection(dbname) {
+  return mysql.createConnection({
+    host: "coinkeeper.cyafa3gjnbdg.ap-northeast-2.rds.amazonaws.com",
+    user: "coinkeeper",
+    password: "coinkeeper",
+    database: dbname,
+    port: 3306
+  });
+}
 
-var conPredictionDB = mysql.createConnection({
-  host: "coinkeeper.cyafa3gjnbdg.ap-northeast-2.rds.amazonaws.com",
-  user: "coinkeeper",
-  password: "coinkeeper",
-  database: "prediction_db",
-  port: 3306
-});
-
-var conUserDB = mysql.createConnection({
-  host: "coinkeeper.cyafa3gjnbdg.ap-northeast-2.rds.amazonaws.com",
-  user: "coinkeeper",
-  password: "coinkeeper",
-  database: "user_db",
-  port: 3306
-});
+var conPriceDB = DBConnection("price_db");
+var conPredictionDB = DBConnection("prediction_db");
+var conUserDB = DBConnection("user_db");
 
 function getClosestTimeByUnit(time, unit) {
   var date = new Date(time), leftDate = new Date(time), rightDate = new Date(time);
