@@ -81,7 +81,7 @@ router.get('/prediction/:st/:en', function(req, res, next) {
 });
 
 router.get('/news', function(req, res, next) {
-  var sql = "SELECT * FROM article ORDER BY datePublised DESC;";
+  var sql = "SELECT * FROM article ORDER BY datePublished DESC;";
   conArticleDB.query(sql, function(err, result, fields) {
     if(err) throw err;
     res.json(result);
