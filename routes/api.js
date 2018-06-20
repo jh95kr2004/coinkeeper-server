@@ -16,6 +16,7 @@ function DBConnection(dbname) {
 var conPriceDB = DBConnection("price_db");
 var conPredictionDB = DBConnection("prediction_db");
 var conUserDB = DBConnection("user_db");
+var conArticleDB = DBConnection("article_db");
 
 function getClosestTimeByUnit(time, unit) {
   var date = new Date(time), leftDate = new Date(time), rightDate = new Date(time);
@@ -72,7 +73,7 @@ router.get('/prediction/:time', function(req, res, next) {
 
 router.get('/prediction/:st/:en', function(req, res, next) {
   var startDate = new Date(req.params.st), endDate = new Date(req.params.en);
-  var sql = "SELECT * FROM prediction WHERE WHERE UNIX_TIMESTAMP(CONCAT(year, '-', month, '-', date, ' ', hour, ':', min, ':', '00')) BETWEEN UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00')) AND UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00'));";
+  var sql = "SELECT * FROM prediction WHERE UNIX_TIMESTAMP(CONCAT(year, '-', month, '-', date, ' ', hour, ':', min, ':', '00')) BETWEEN UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00')) AND UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00'));";
   conPredictionDB.query(sql, [startDate.toJSON(), endDate.toJSON()], function(err, result, fields) {
     if(err) throw err;
     res.json(result);
@@ -80,15 +81,26 @@ router.get('/prediction/:st/:en', function(req, res, next) {
 });
 
 router.get('/news', function(req, res, next) {
+  var sql = "SELECT * FROM article ORDER BY datePublised DESC;";
+  conArticleDB.query(sql, function(err, result, fields) {
+    if(err) throw err;
+    res.json(result);
+  });
 });
 
-router.get('/news/:st/:en', function(req, res, next) {
+router.get('/account/:deviceID', function(req, res, next) {
+  var sql = "SELECT * FROM userinfo WHERE deviceID = ?;";
+  conUserDB.query(sql, [req.params.devideID], function(err, result, fields) {
+    if(err) throw err;
+    res.json(result);
+  });
 });
 
-router.get('/account/:deviceID/', function(req, res, next) {
-});
-
-router.post('/account/:deviceID/:currency', function(req, res, next) {
+router.post('/account/:deviceID', function(req, res, next) {
+  var sql = "INSERT INTO userinfo (deviceID, upper, lower) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE upper = ?, lower = ?;";
+  conUserDB.query(sql, [req.params.deviceID, req.body.upper, req.body.lower, req.body.upper, req.body.lower], function(err, result, fields) {
+    if(err) throw err;
+  });
 });
 
 module.exports = router;
