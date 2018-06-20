@@ -92,7 +92,7 @@ router.get('/account/:deviceID', function(req, res, next) {
   var sql = "SELECT * FROM userinfo WHERE deviceID = ?;";
   conUserDB.query(sql, [req.params.devideID], function(err, result, fields) {
     if(err) throw err;
-    res.json(result);
+    res.json(result[0]);
   });
 });
 
