@@ -55,7 +55,7 @@ router.get('/currency/:st/:en', function(req, res, next) {
 });
 
 router.get('/prediction', function(req, res, next) {
-  var sql = "SELECT * FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(year, '-', month, '-', date, ' ', hour, ':', min, ':', '00')) DESC LIMIT 1;";
+  var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(date, '-', time)) DESC LIMIT 1;";
   conPredictionDB.query(sql, function(err, result, fields) {
     if(err) throw err;
     res.json(result[0]);
@@ -64,7 +64,7 @@ router.get('/prediction', function(req, res, next) {
 
 router.get('/prediction/:time', function(req, res, next) {
   var date = getClosestTimeByUnit(req.params.time, 5);
-  var sql = "SELECT * FROM prediction WHERE year = ? AND month = ? AND date = ? AND hour = ? AND min = ?;";
+  var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction WHERE date = '?-?-?' AND time = '?:?:00';";
   conPredictionDB.query(sql, [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes()], function(err, result, fields) {
     if(err) throw err;
     res.json(result[0]);
@@ -73,7 +73,7 @@ router.get('/prediction/:time', function(req, res, next) {
 
 router.get('/prediction/:st/:en', function(req, res, next) {
   var startDate = new Date(req.params.st), endDate = new Date(req.params.en);
-  var sql = "SELECT * FROM prediction WHERE UNIX_TIMESTAMP(CONCAT(year, '-', month, '-', date, ' ', hour, ':', min, ':', '00')) BETWEEN UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00')) AND UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00'));";
+  var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction WHERE UNIX_TIMESTAMP(CONCAT(date, '-', time)) BETWEEN UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00')) AND UNIX_TIMESTAMP(CONVERT_TZ(CONCAT(?), '+00:00', '+09:00'));";
   conPredictionDB.query(sql, [startDate.toJSON(), endDate.toJSON()], function(err, result, fields) {
     if(err) throw err;
     res.json(result);
