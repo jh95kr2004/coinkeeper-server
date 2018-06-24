@@ -120,8 +120,6 @@ function sendPushNotification(registrationTokens, title, body) {
     }
   };
 
-  console.log(registrationTokens);
-
   admin.messaging().sendToDevice(registrationTokens, payload)
     .then((response) => {
       console.log('Successfully sent message:', response);
