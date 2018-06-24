@@ -120,6 +120,8 @@ function sendPushNotification(registrationTokens, title, body) {
     }
   };
 
+  console.log(registrationTokens);
+
   admin.messaging().sendToDevice(registrationTokens, payload)
     .then((response) => {
       console.log('Successfully sent message:', response);
@@ -159,7 +161,8 @@ router.get('/refresh', function(req, res, next) {
 router.get('/refreshPrediction', function(req, res, next) {
   var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(date, '-', time)) DESC LIMIT 1;";
   conPredictionDB.query(sql, function(err, prediction, fields) {
-    if(prediction[0]["label_0"] != -2 && prediction[0]["label_0"] != 2) {
+    console.log(prediction[0]["label_0"]);
+    if(prediction[0]["label_0"] == -2 || prediction[0]["label_0"] == 2) {
       var sql = "SELECT deviceID FROM userinfo;"
         conUserDB.query(sql, function(err, users, fields) {
           var tokens = [];
