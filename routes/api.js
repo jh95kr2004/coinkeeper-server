@@ -112,20 +112,46 @@ router.post('/account/:deviceID', function(req, res, next) {
   });
 });
 
+function sendPushNotification(registrationTokens, title, body) {
+  var payload = {
+    notification: {
+      title: title,
+      body: body
+    }
+  };
+
+  console.log(registrationTokens);
+
+  admin.messaging().sendToDevice(registrationTokens, payload)
+    .then((response) => {
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+    });
+}
+
+router.get('/pushTest', function(req, res, next) {
+  var sql = "SELECT deviceID FROM userinfo;"
+    conUserDB.query(sql, function(err, users, fields) {
+      var tokens = [];
+      for(let user of users) tokens.push(user["deviceID"]);
+      sendPushNotification(tokens, "Push test", "푸시 알람 테스트입니다.");
+      res.send("done");
+  });
+});
+
 router.get('/refresh', function(req, res, next) {
-  var sql = "SELECT * FROM userinfo;"
-  conUserDB.query(sql, function(err, users, fields) {
-    if(err) throw err;
-    var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM recentdata ORDER BY UNIX_TIMESTAMP(CONCAT(date, ' ', time)) DESC LIMIT 2;";
-    conPriceDB.query(sql, function(err, prices, fields) {
-      var prevPrice = prices[1]["price_krw"], curPrice = prices[0]["price_krw"];
+  var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM recentdata ORDER BY UNIX_TIMESTAMP(CONCAT(date, ' ', time)) DESC LIMIT 2;";
+  conPriceDB.query(sql, function(err, prices, fields) {
+    var prevPrice = prices[1]["price_krw"], curPrice = prices[0]["price_krw"];
+    var sql = "SELECT * FROM userinfo;"
+      conUserDB.query(sql, function(err, users, fields) {
       for(let user of users) {
-        if(prevPrice < user["upper"] && user["upper"] <= curPrice) {
-          // send push notification
-        }
-        if(curPrice >= user["lower"] && user["lower"] > prevPrice) {
-          // send push notification
-        }
+        if(prevPrice < user["upper"] && user["upper"] <= curPrice)
+          sendPushNotification(user["deviceID"], "시세 도달", "시세가 상승하여 설정값에 도달하였습니다.");
+        if(curPrice >= user["lower"] && user["lower"] > prevPrice)
+          sendPushNotification(user["deviceID"], "시세 도달", "시세가 하락하여 설정값에 도달하였습니다.");
       }
     });
   });
@@ -134,15 +160,17 @@ router.get('/refresh', function(req, res, next) {
 router.get('/refreshPrediction', function(req, res, next) {
   var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(date, '-', time)) DESC LIMIT 1;";
   conPredictionDB.query(sql, function(err, prediction, fields) {
-    console.log(prediction);
-    if(prediction[0]["label_0"] == -2) {
-      // send push notification
-      res.send("Increase push notification is sent.");
-    } else if(prediction[0]["label_0"] == 2) {
-      // send push notification
-      res.send("Decrease push notification is sent.");
+    if(prediction[0]["label_0"] != -2 && prediction[0]["label_0"] != 2) {
+      var sql = "SELECT deviceID FROM userinfo;"
+        conUserDB.query(sql, function(err, users, fields) {
+          var tokens = [];
+          for(let user of users) tokens.push(user["deviceID"]);
+          if(prediction[0]["label_0"] == -2)
+            sendPushNotification(tokens, "시세 급등", "시세 급등이 관측되었습니다.");
+          else if(prediction[0]["label_0"] == 2)
+            sendPushNotification(tokens, "시세 급락", "시세 급락이 관측되었습니다.");
+      });
     }
-    res.send("No push notification is sent.");
   });
 });
 
