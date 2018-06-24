@@ -98,13 +98,41 @@ router.get('/account/:deviceID', function(req, res, next) {
 
 router.post('/account/:deviceID', function(req, res, next) {
   var sql = "INSERT INTO userinfo (deviceID, upper, lower) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE upper = ?, lower = ?;";
-  console.log(req.params.deviceID, req.body.upper, req.body.lower);
   conUserDB.query(sql, [req.params.deviceID, req.body.upper, req.body.lower, req.body.upper, req.body.lower], function(err, result, fields) {
     if(err) throw err;
+    res.send("123");
   });
 });
 
-router.post('/refresh', function(req, res, next) {
+router.get('/refresh', function(req, res, next) {
+  var sql = "SELECT * FROM userinfo;"
+  conUserDB.query(sql, function(err, users, fields) {
+    if(err) throw err;
+    var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM recentdata ORDER BY UNIX_TIMESTAMP(CONCAT(date, ' ', time)) DESC LIMIT 2;";
+    conPriceDB.query(sql, function(err, prices, fields) {
+      var prevPrice = prices[1]["price_krw"], curPrice = prices[0]["price_krw"];
+      for(let user of users) {
+        if(prevPrice < user["upper"] && user["upper"] <= curPrice) {
+          // send push notification
+        }
+        if(curPrice >= user["lower"] && user["lower"] > prevPrice) {
+          // send push notification
+        }
+      }
+    });
+  });
+});
+
+router.get('/refreshPrediction', function(req, res, next) {
+  var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(date, '-', time)) DESC LIMIT 1;";
+  conPriceDB.query(sql, function(err, prediction, fields) {
+    if(prediction[0]["label_0"] == -2) {
+      res.send("Push notification is sent.");
+    } else if(prediction[0]["label_0"] == 2) {
+      res.send("Push notification is sent.");
+    }
+    res.send("No Push notification is send");
+  });
 });
 
 module.exports = router;
