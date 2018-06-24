@@ -153,6 +153,7 @@ router.get('/refresh', function(req, res, next) {
       }
     });
   });
+  res.send("Refresh is done");
 });
 
 router.get('/refreshPrediction', function(req, res, next) {
@@ -170,6 +171,7 @@ router.get('/refreshPrediction', function(req, res, next) {
       });
     }
   });
+  res.send("Refresh prediction is done");
 });
 
 module.exports = router;
