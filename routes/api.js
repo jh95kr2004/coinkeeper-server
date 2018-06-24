@@ -4,10 +4,11 @@ var router = express.Router();
 var mysql = require('mysql');
 var admin = require('firebase-admin');
 
-var serviceAccount = require('../public/google-services.json');
+var serviceAccount = require('../coinkeeper-b735f-firebase-adminsdk-9sm8f-6fdc38254e.json');
 
 admin.initializeApp({
-  //credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://coinkeeper-b735f.firebaseio.com"
 });
 
 function DBConnection(dbname) {
