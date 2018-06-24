@@ -98,9 +98,13 @@ router.get('/account/:deviceID', function(req, res, next) {
 
 router.post('/account/:deviceID', function(req, res, next) {
   var sql = "INSERT INTO userinfo (deviceID, upper, lower) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE upper = ?, lower = ?;";
+  console.log(req.params.deviceID, req.body.upper, req.body.lower);
   conUserDB.query(sql, [req.params.deviceID, req.body.upper, req.body.lower, req.body.upper, req.body.lower], function(err, result, fields) {
     if(err) throw err;
   });
+});
+
+router.post('/refresh', function(req, res, next) {
 });
 
 module.exports = router;
