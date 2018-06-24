@@ -11,6 +11,7 @@
     "ejs": "^2.6.1",
     "ejs-layouts": "0.0.1",
     "express": "~4.16.0",
+    "firebase-admin": "^5.12.1",
     "http": "0.0.0",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",

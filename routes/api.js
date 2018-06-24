@@ -2,6 +2,13 @@ var express = require('express');
 var router = express.Router();
 
 var mysql = require('mysql');
+var admin = require('firebase-admin');
+
+var serviceAccount = require('../public/google-services.json');
+
+admin.initializeApp({
+  //credential: admin.credential.cert(serviceAccount)
+});
 
 function DBConnection(dbname) {
   return mysql.createConnection({
@@ -125,13 +132,16 @@ router.get('/refresh', function(req, res, next) {
 
 router.get('/refreshPrediction', function(req, res, next) {
   var sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM prediction ORDER BY UNIX_TIMESTAMP(CONCAT(date, '-', time)) DESC LIMIT 1;";
-  conPriceDB.query(sql, function(err, prediction, fields) {
+  conPredictionDB.query(sql, function(err, prediction, fields) {
+    console.log(prediction);
     if(prediction[0]["label_0"] == -2) {
-      res.send("Push notification is sent.");
+      // send push notification
+      res.send("Increase push notification is sent.");
     } else if(prediction[0]["label_0"] == 2) {
-      res.send("Push notification is sent.");
+      // send push notification
+      res.send("Decrease push notification is sent.");
     }
-    res.send("No Push notification is send");
+    res.send("No push notification is sent.");
   });
 });
 
