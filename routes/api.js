@@ -120,7 +120,7 @@ function sendPushNotification(registrationTokens, title, body) {
     }
   };
 
-  console.log(registrationTokens);
+  console.log(registrationTokens, title, body);
 
   admin.messaging().sendToDevice(registrationTokens, payload)
     .then((response) => {
@@ -134,9 +134,9 @@ function sendPushNotification(registrationTokens, title, body) {
 router.get('/pushTest', function(req, res, next) {
   var sql = "SELECT deviceID FROM userinfo;"
     conUserDB.query(sql, function(err, users, fields) {
-      var tokens = [];
+      var tokens = [], curPrice = 123123;
       for(let user of users) tokens.push(user["deviceID"]);
-      sendPushNotification(tokens, "Push test", "푸시 알람 테스트입니다.");
+      sendPushNotification(tokens, "시세 상승", "현재 시세가 " + curPrice + "원에 도달하였습니다.");
       res.send("done");
   });
 });
@@ -149,9 +149,9 @@ router.get('/refresh', function(req, res, next) {
       conUserDB.query(sql, function(err, users, fields) {
       for(let user of users) {
         if(prevPrice < user["upper"] && user["upper"] <= curPrice)
-          sendPushNotification(user["deviceID"], "시세 도달", "시세가 상승하여 설정값에 도달하였습니다.");
+          sendPushNotification(user["deviceID"], "시세 상승", "현재 시세가 " + curPrice + "원에 도달하였습니다.");
         if(curPrice >= user["lower"] && user["lower"] > prevPrice)
-          sendPushNotification(user["deviceID"], "시세 도달", "시세가 하락하여 설정값에 도달하였습니다.");
+          sendPushNotification(user["deviceID"], "시세 하락", "현재 시세가 " + curPrice + "원에 도달하였습니다.");
       }
     });
   });
@@ -168,9 +168,9 @@ router.get('/refreshPrediction', function(req, res, next) {
           var tokens = [];
           for(let user of users) tokens.push(user["deviceID"]);
           if(prediction[0]["label_0"] == -2)
-            sendPushNotification(tokens, "시세 급등", "시세 급등이 관측되었습니다.");
+            sendPushNotification(tokens, "시세 급락", "시세 급락이 예측되었습니다.");
           else if(prediction[0]["label_0"] == 2)
-            sendPushNotification(tokens, "시세 급락", "시세 급락이 관측되었습니다.");
+            sendPushNotification(tokens, "시세 급등", "시세 급등이 예측되었습니다.");
       });
     }
   });
